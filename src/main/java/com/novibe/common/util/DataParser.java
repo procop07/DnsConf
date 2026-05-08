@@ -50,7 +50,7 @@ public class DataParser {
         if (commentIndex >= 0) {
             return line.substring(0, commentIndex).strip();
         }
-        return line;
+        return line.strip();
     }
 
     private static boolean isValidIP(String ip) {

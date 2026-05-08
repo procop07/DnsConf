@@ -35,7 +35,7 @@ public class HostsBlockListsLoader extends ListLoader<String> {
         return false;
     }
 
-    private static boolean isLocalhost(String domain) {
+    public static boolean isLocalhost(String domain) {
         for (String localhost : LOCALHOST_NAME) {
             if (domain.equals(localhost))
                 return true;

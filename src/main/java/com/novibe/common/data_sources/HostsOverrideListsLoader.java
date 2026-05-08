@@ -20,7 +20,7 @@ public class HostsOverrideListsLoader extends ListLoader<HostsOverrideListsLoade
 
     @Override
     protected Predicate<HostsLine> filterRelatedLines() {
-        return line -> !HostsBlockListsLoader.isBlockIp(line.ip()) && nonNull(line.domain());
+        return line -> !HostsBlockListsLoader.isBlockIp(line.ip()) && nonNull(line.domain()) && !HostsBlockListsLoader.isLocalhost(line.domain());
 
     }
 

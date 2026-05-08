@@ -35,6 +35,7 @@ public class NextDnsRateLimitedApiProcessor {
                     Log.progress("Current success progress: " + ++successCounter + "/" + requestList.size());
                     waveCounter++;
                 }
+                Thread.sleep(1000);
             } catch (DnsHttpError e) {
                 if (e.getCode() == 524 || e.getCode() == 429) {
                     requestQueue.add(requestDto);
