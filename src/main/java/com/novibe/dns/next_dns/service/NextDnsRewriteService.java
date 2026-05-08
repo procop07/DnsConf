@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Objects.nonNull;
 
@@ -26,7 +27,12 @@ public class NextDnsRewriteService {
 
     public Map<String, CreateRewriteDto> buildNewRewrites(List<HostsOverrideListsLoader.BypassRoute> overrides) {
         Map<String, CreateRewriteDto> rewriteDtos = new HashMap<>();
-        overrides.forEach(route -> rewriteDtos.putIfAbsent(route.website(), new CreateRewriteDto(route.website(), route.ip())));
+        overrides.forEach(route -> {
+            if (route.website() != null && !route.website().isBlank()
+                    && route.ip() != null && !route.ip().isBlank()) {
+                rewriteDtos.putIfAbsent(route.website(), new CreateRewriteDto(route.website(), route.ip()));
+            }
+        });
         return rewriteDtos;
     }
 
@@ -45,7 +51,7 @@ public class NextDnsRewriteService {
                 continue;
             }
             CreateRewriteDto request = newRewriteRequests.get(domain);
-            if (nonNull(request) && !request.content().equals(oldIp)) {
+            if (nonNull(request) && !Objects.equals(request.content(), oldIp)) {
                 outdatedIds.add(existingRewrite.id());
             } else {
                 newRewriteRequests.remove(domain);

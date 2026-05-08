@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.concurrent.Semaphore;
 
 import static java.util.Objects.isNull;
@@ -71,6 +72,7 @@ public abstract class HttpRequestSender {
                 .header(authHeaderName(), authHeaderValue())
                 .header("Content-Type", "application/json")
                 .method(method, requestBody)
+                .timeout(Duration.ofSeconds(30))
                 .build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         semaphore.release();

@@ -1,25 +1,41 @@
 package com.novibe.common.util;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class Log {
+
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    private static String prefix() {
+        String time = LocalDateTime.now().format(TIME_FMT);
+        String caller = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
+                .walk(frames -> frames
+                        .skip(2)
+                        .findFirst()
+                        .map(f -> f.getDeclaringClass().getSimpleName())
+                        .orElse("?"));
+        return "[%s] [%s] ".formatted(time, caller);
+    }
 
     public static void global(String msg) {
         IO.println(Color.YELLOW_BOLD + "\n#==#==# " + Color.GREEN_BOLD + msg + Color.YELLOW_BOLD + " #==#==#\n" + Color.RESET);
     }
 
     public static void step(String msg) {
-        IO.println(Color.BLUE_BOLD + "\n--- " + msg + Color.RESET);
+        IO.println(prefix() + Color.BLUE_BOLD + "--- " + msg + Color.RESET);
     }
 
     public static void io(String msg) {
-        IO.println(Color.YELLOW + ">>> " + Color.PURPLE + msg + Color.RESET);
+        IO.println(prefix() + Color.YELLOW + ">>> " + Color.PURPLE + msg + Color.RESET);
     }
 
     public static void fail(String msg) {
-        IO.println("\n" + Color.YELLOW_BOLD + "!!!" + Color.RED + " " + msg + Color.RESET);
+        IO.println(prefix() + Color.YELLOW_BOLD + "!!! " + Color.RED + msg + Color.RESET);
     }
 
     public static void common(String msg) {
-        IO.println(msg);
+        IO.println(prefix() + msg);
     }
 
     public static void progress(String msg) {
@@ -39,3 +55,4 @@ public class Log {
     }
 
 }
+

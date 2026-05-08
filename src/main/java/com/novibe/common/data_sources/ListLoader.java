@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -61,8 +62,31 @@ public abstract class ListLoader<T> {
         Log.io("Loading %s list from url: %s".formatted(listType(), url));
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .GET()
+                .timeout(Duration.ofSeconds(30))
                 .build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)).body();
+
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                if (response.statusCode() >= 400) {
+                    throw new java.io.IOException("HTTP %s from %s".formatted(response.statusCode(), url));
+                }
+                response.headers().firstValue("Content-Type").ifPresent(ct -> {
+                    if (!ct.contains("text/")) {
+                        Log.fail("WARNING: Unexpected Content-Type '%s' from %s".formatted(ct, url));
+                    }
+                });
+                return response.body();
+            } catch (Exception e) {
+                Log.fail("Attempt %s/%s failed for %s: %s".formatted(attempt, maxRetries, url, e.getMessage()));
+                if (attempt < maxRetries) {
+                    Thread.sleep(2000L * attempt);
+                }
+            }
+        }
+        Log.fail("All %s attempts failed for %s, skipping".formatted(maxRetries, url));
+        return "";
     }
 
 }
